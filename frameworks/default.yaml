@@ -1,0 +1,76 @@
+# Default analysis framework — generic fallback for unknown content types.
+
+skeleton:
+  output_schema:
+    type: array
+    items:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: "Topic name"
+        description:
+          type: string
+          description: "Brief explanation"
+        claims:
+          type: array
+          items:
+            type: string
+          description: "Key claims"
+        relationships:
+          type: array
+          items:
+            type: string
+          description: "Relationships to other topics"
+
+  methodology_prompt: |
+    Extract the core knowledge structure from this content.
+
+    For each major topic:
+    1. What is the topic and why does it matter?
+    2. What claims or assertions does the author make?
+    3. How does this relate to other topics?
+
+    Focus on meaningful knowledge nodes, not section headings.
+
+  quality_rules:
+    min_topics: 3
+    soft_max_topics: 8
+    max_topics: 14
+    require_claims: true
+
+  # ── Multi-pass coverage archetypes ────────────────────────────────
+  coverage_archetypes:
+    core_definitions:
+      description: "Fundamental concepts and definitions the content establishes"
+      check_prompt: |
+        Are the core definitions and fundamental concepts captured?
+      importance: critical
+    key_claims:
+      description: "Primary assertions, arguments, or theses"
+      check_prompt: |
+        Does the skeleton capture the main claims or arguments?
+      importance: critical
+    supporting_evidence:
+      description: "Data, examples, or reasoning that backs up claims"
+      check_prompt: |
+        Is the evidence supporting each claim captured?
+      importance: high
+    relationships:
+      description: "Connections and dependencies between concepts"
+      check_prompt: |
+        Are the relationships between topics explicitly described?
+      importance: high
+
+chapter:
+  analysis_prompt: |
+    Analyze this section anchored to the skeleton. Identify covered topics,
+    extract insights, and note contradictions.
+
+  output_schema:
+    type: object
+    properties:
+      section_id: { type: string }
+      topics_covered: { type: array }
+      new_concepts: { type: array }
+      contradictions: { type: array }

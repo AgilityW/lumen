@@ -1,0 +1,68 @@
+# Technical analysis framework
+# Encodes the analytical methodology for technical books and podcasts.
+
+skeleton:
+  methodology_prompt: |
+    You are analyzing content. First identify the content type:
+    - Technical book / Article
+    - Podcast transcript / Interview
+    - Tutorial / How-to guide
+    - Reference / Encyclopedia
+    - Research monograph
+
+    Then adapt your extraction strategy accordingly.
+
+    **For podcast transcripts or interviews:**
+    Focus on the core arguments, technical insights, and design decisions the guest is making. Distinguish between:
+    - The guest's key architectural bets and why they made them
+    - Supporting evidence and reasoning
+    - Background context vs. core innovation
+    - Forward-looking predictions vs. current technical reality
+
+    Extract topics that represent the knowledge structure — NOT a summary of the conversation flow.
+
+    **For all content types:**
+    Each topic should be a meaningful knowledge node, not a section heading. Include:
+    - What the concept is
+    - Why it matters
+    - How it relates to other topics
+
+    Self-check: Is each topic a genuine insight or design decision, not just a section title?
+
+  quality_rules:
+    min_topics: 4
+    soft_max_topics: 8
+    max_topics: 14
+    require_claims: true
+    require_relationships: true
+
+chapter:
+  analysis_prompt: |
+    Given the frozen skeleton and this chapter's content:
+
+    1. Identify which skeleton topics are addressed in this chapter
+    2. Extract detailed explanations, evidence, and examples for each topic
+    3. Note any new concepts introduced that extend the skeleton
+    4. Identify code snippets or technical details worth preserving
+    5. Flag any contradictions or refinements to skeleton claims
+
+  output_schema:
+    type: object
+    properties:
+      chapter_id:
+        type: string
+      topics_covered:
+        type: array
+        items:
+          type: object
+          properties:
+            topic: { type: string }
+            key_insights: { type: array, items: { type: string } }
+            technical_details: { type: array, items: { type: string } }
+            code_references: { type: array, items: { type: string } }
+      new_concepts:
+        type: array
+        items: { type: string }
+      contradictions:
+        type: array
+        items: { type: string }

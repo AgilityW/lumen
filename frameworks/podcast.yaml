@@ -1,0 +1,179 @@
+# Podcast / Interview analysis framework
+
+skeleton:
+  output_schema:
+    type: array
+    items:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: "Concise topic name (e.g., 'Hybrid SRAM+HBM Memory Architecture')"
+        core_argument:
+          type: string
+          description: "The guest's central thesis or design decision"
+        evidence_chain:
+          type: array
+          items:
+            type: string
+          description: "Supporting evidence, reasoning steps, and data points"
+        tension_point:
+          type: string
+          description: "Counter-argument, trade-off, or skeptical angle"
+        key_quotes:
+          type: array
+          items:
+            type: string
+          description: "Direct quotes with timestamp markers"
+        timestamp:
+          type: string
+          description: "Approximate time range (e.g., '09:42~20:24')"
+        speaker:
+          type: string
+          description: "Primary speaker for this topic"
+        relationships:
+          type: array
+          items:
+            type: string
+          description: "depends-on / conflicts-with / extends / supports"
+
+  methodology_prompt: |
+    You are analyzing a podcast transcript or interview. The content consists of
+    a conversation between speakers discussing technical topics.
+
+    ### Extraction Strategy
+
+    Identify the GUEST'S core arguments, architectural bets, and design decisions.
+    The guest is the subject-matter expert — focus on what THEY are asserting, not
+    the host's questions.
+
+    For each major topic the guest discusses, extract:
+
+    1. **Core argument** — What is the guest's central claim or design decision?
+    2. **Evidence chain** — What reasoning, data, or examples support this claim?
+    3. **Tension point** — What counter-argument, trade-off, or limitation does the guest acknowledge? If they don't, infer a reasonable skepticism.
+    4. **Key quotes** — 1-2 verbatim quotes that crystallize the argument.
+    5. **Timestamp** — Approximate time range in the conversation.
+
+    ### What to look for
+
+    - **Architectural bets**: "We chose X over Y because..."
+    - **First-principles reasoning**: "If you start from physics, the right answer is..."
+    - **Causal chains**: "Lower latency → smaller batch → better throughput"
+    - **Comparative claims**: "Unlike NVIDIA, we..."
+    - **Quantitative claims**: "95% of model innovations don't change hardware requirements"
+
+    ### What to avoid
+
+    - Don't summarize the conversation flow or the host's questions
+    - Don't extract topics that are just background context without a claim
+    - Don't include generic filler or pleasantries
+
+    Self-check: For each topic, ask — "Could I describe this to someone as a design decision or insight, not just a thing they talked about?"
+
+  quality_rules:
+    min_topics: 4
+    soft_max_topics: 12
+    max_topics: 20
+    require_core_argument: true
+    require_evidence_chain: true
+    require_tension_point: true
+    require_timestamp: true
+
+  # ── Multi-pass archetypes ──────────────────────────────────────────
+  # After initial extraction, each archetype is checked. Missing ones
+  # trigger a targeted re-extraction pass.
+  # ── Generic podcast coverage archetypes ──────────────────────────
+  # These apply to ANY podcast episode regardless of topic.
+  # Each checks a structural dimension of analysis quality.
+  coverage_archetypes:
+    quantitative_frameworks:
+      description: "Mathematical derivations, formulas, ratios, and quantitative claims"
+      check_prompt: |
+        Are there topics with quantitative or mathematical content?
+        Look for: derived formulas, ratios (e.g., compute/memory bandwidth),
+        algebraic relationships, optimization equations, numerical estimates.
+      importance: critical
+    physical_constraints:
+      description: "Hardware/physics limits that bound the discussion"
+      check_prompt: |
+        Are the underlying physical constraints explained?
+        Look for: memory bandwidth limits, compute throughput caps,
+        thermal/power/space constraints, communication topology limits.
+      importance: critical
+    economic_tradeoffs:
+      description: "Cost structures, pricing, economic incentives"
+      check_prompt: |
+        Are the economic or business implications covered?
+        Look for: pricing models, cost-per-query, API pricing tiers,
+        CapEx vs OpEx, ROI calculations, market dynamics.
+      importance: high
+    comparative_analysis:
+      description: "Comparisons between approaches, architectures, or trade-offs"
+      check_prompt: |
+        Does the skeleton capture trade-off comparisons?
+        Look for: technique A vs technique B, pros vs cons,
+        cost-performance trade-offs, design alternatives.
+      importance: high
+    causal_chains:
+      description: "Cause-effect relationships and bottleneck analysis"
+      check_prompt: |
+        Are causal chains identified?
+        Look for: X causes Y, bottleneck analysis, constraint propagation,
+        "if A then B" logic, optimization levers.
+      importance: high
+    scalability_limits:
+      description: "Scaling behavior, future bottlenecks, and growth constraints"
+      check_prompt: |
+        Does the skeleton address scaling limits or future directions?
+        Look for: scaling laws, growth constraints, future bottlenecks,
+        what limits further progress, roadmap implications.
+      importance: medium
+    practical_implications:
+      description: "Real-world implications, industry impact, or actionable insights"
+      check_prompt: |
+        Are there topics connecting theory to practice?
+        Look for: industry impact, deployment lessons, engineering practice,
+        what this means for practitioners, implications.
+      importance: medium
+
+chapter:
+  analysis_prompt: |
+    Given the frozen skeleton and this segment of the podcast transcript:
+
+    1. For each skeleton topic that appears in this segment:
+       - Extract the full reasoning chain the guest provides
+       - Note any new evidence or examples
+       - Capture verbatim quotes with timestamps
+       - Identify any refinements or contradictions to the skeleton claim
+    2. Note any new topics introduced in this segment that aren't in the skeleton
+    3. Flag any "off-the-record" asides, tangents, or corrections
+    4. Identify the current speaker for each contribution
+
+  output_schema:
+    type: object
+    properties:
+      segment_id:
+        type: string
+      timestamp_range:
+        type: string
+      speakers:
+        type: array
+        items:
+          type: string
+      topics_covered:
+        type: array
+        items:
+          type: object
+          properties:
+            topic: { type: string }
+            reasoning_chain: { type: array, items: { type: string } }
+            verbatim_quotes: { type: array, items: { type: string } }
+            technical_details: { type: array, items: { type: string } }
+            speaker: { type: string }
+      new_topics:
+        type: array
+        items: { type: string }
+      tensions:
+        type: array
+        items: { type: string }

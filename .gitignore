@@ -1,0 +1,30 @@
+# Lumen gitignore
+
+# Secrets
+.env
+config.yaml
+
+# Runtime data
+output/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.venv/
+.venv*/
+
+# IDE / OS
+.DS_Store
+*.swp
+*.swo
+*~
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Project-specific
+review_opencode.md
+AGENTS.md
+TODO.md

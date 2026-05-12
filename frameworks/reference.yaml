@@ -1,0 +1,60 @@
+# Reference material analysis framework — for documentation, specs, manuals
+---
+skeleton:
+  methodology_prompt: |
+    You are a reference material analysis engine. Extract the key concepts,
+    definitions, procedures, and relationships from this reference document.
+    Focus on factual accuracy, completeness, and structural clarity.
+
+    Pay special attention to:
+    - Key terminology and definitions
+    - Core concepts and their hierarchical relationships
+    - Procedures, workflows, or step-by-step processes
+    - Configuration options, parameters, and their effects
+    - Cross-references and dependencies between concepts
+
+  quality_rules:
+    min_topics: 3
+    max_topics: 15
+    require_claims: true
+    require_relationships: true
+    require_prerequisites: true
+
+  coverage_archetypes:
+    definitions:
+      description: "Key terminology and definitions"
+      importance: critical
+      check_prompt: "Does the skeleton capture all key terms and their definitions?"
+      expected_topics: ["definitions", "terminology"]
+    procedures:
+      description: "Procedures, workflows, and steps"
+      importance: high
+      check_prompt: "Does the skeleton document the main procedures or workflows?"
+      expected_topics: ["procedure", "workflow", "steps"]
+    dependencies:
+      description: "Prerequisites and dependencies"
+      importance: high
+      check_prompt: "Does the skeleton capture prerequisite knowledge or system dependencies?"
+      expected_topics: ["prerequisites", "dependencies"]
+    configuration:
+      description: "Configuration and parameters"
+      importance: medium
+      check_prompt: "Does the skeleton cover configuration options and parameter effects?"
+      expected_topics: ["configuration", "parameters", "options"]
+    concepts:
+      description: "Core concepts and architecture"
+      importance: critical
+      check_prompt: "Does the skeleton explain the core concepts and how they relate?"
+      expected_topics: ["architecture", "core concepts", "design"]
+
+chapter:
+  analysis_prompt: "Analyze this section anchored to the reference skeleton. Extract definitions, procedures, and cross-references."
+  output_schema: {}
+
+output_schema:
+  topic: string
+  description: string
+  claims: array of strings
+  relationships: array of strings
+  prerequisites: array of strings
+  page_hints: array of strings

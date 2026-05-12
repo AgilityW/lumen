@@ -1,0 +1,59 @@
+# Article analysis framework — for academic papers, blog posts, essays
+---
+skeleton:
+  methodology_prompt: |
+    You are an article analysis engine. Extract the core thesis, supporting
+    arguments, evidence, and conclusions from this article. Focus on the
+    author's original contribution, methodology, and findings.
+
+    Pay special attention to:
+    - The central thesis or research question
+    - Methodology and approach
+    - Key findings or results
+    - Limitations and future work
+    - Connections to broader field context
+
+  quality_rules:
+    min_topics: 3
+    max_topics: 10
+    require_claims: true
+    require_relationships: true
+
+  coverage_archetypes:
+    thesis:
+      description: "Core thesis / research question"
+      importance: critical
+      check_prompt: "Does the skeleton capture the article's central thesis or research question?"
+      expected_topics: ["main thesis", "research question"]
+    methodology:
+      description: "Methodology and approach"
+      importance: high
+      check_prompt: "Does the skeleton cover how the author conducted the research or analysis?"
+      expected_topics: ["method", "approach", "experimental design"]
+    findings:
+      description: "Key findings and results"
+      importance: critical
+      check_prompt: "Does the skeleton capture the main findings or contributions?"
+      expected_topics: ["results", "findings", "contributions"]
+    limitations:
+      description: "Limitations and caveats"
+      importance: medium
+      check_prompt: "Does the skeleton address limitations or boundary conditions?"
+      expected_topics: ["limitations", "caveats"]
+    context:
+      description: "Broader context and related work"
+      importance: medium
+      check_prompt: "Does the skeleton connect to related work or broader field context?"
+      expected_topics: ["related work", "background", "context"]
+
+chapter:
+  analysis_prompt: "Analyze this section anchored to the article skeleton. Identify how each paragraph contributes to the thesis and argumentation."
+  output_schema: {}
+
+output_schema:
+  topic: string
+  description: string
+  claims: array of strings
+  evidence: array of strings
+  relationships: array of strings
+  page_refs: array of strings

@@ -1,0 +1,116 @@
+# Book / Textbook analysis framework
+# Structured knowledge with chapters, progressive concepts, and referenced arguments.
+
+skeleton:
+  output_schema:
+    type: array
+    items:
+      type: object
+      properties:
+        topic:
+          type: string
+          description: "Concise concept name"
+        description:
+          type: string
+          description: "1-2 sentence explanation of what this concept is and why it matters"
+        claims:
+          type: array
+          items:
+            type: string
+          description: "Key assertions or theorems the author makes"
+        relationships:
+          type: array
+          items:
+            type: string
+          description: "How this concept relates to others (depends-on / conflicts-with / extends / supports)"
+        prerequisites:
+          type: array
+          items:
+            type: string
+          description: "Knowledge needed to understand this concept"
+        page_hints:
+          type: array
+          items:
+            type: string
+          description: "Chapter or section references in the book"
+
+  methodology_prompt: |
+    You are analyzing a book or textbook. Identify the core knowledge structure:
+
+    For each major concept:
+    1. **Definition** — What is this concept? Why does it matter in this context?
+    2. **Claims** — What assertions or theorems does the author make?
+    3. **Relationships** — How does it depend on, conflict with, or extend other concepts?
+    4. **Prerequisites** — What prior knowledge is needed to understand it?
+
+    Focus on the author's original arguments and the chain of reasoning that builds
+    from foundational concepts to advanced ones. Treat this as a knowledge graph
+    extraction — each topic should be a node in that graph.
+
+  quality_rules:
+    min_topics: 5
+    soft_max_topics: 12
+    max_topics: 20
+    require_claims: true
+    require_relationships: true
+    require_prerequisites: true
+
+  # ── Multi-pass coverage archetypes ────────────────────────────────
+  # Applied after initial extraction to find gaps.
+  coverage_archetypes:
+    foundational_definitions:
+      description: "Core definitions, axioms, and fundamental concepts the author establishes"
+      check_prompt: |
+        Does the skeleton capture foundational definitions the reader needs to understand?
+        Look for: key terms defined, conceptual boundaries drawn, axiomatic assumptions.
+      importance: critical
+    causal_chains:
+      description: "Cause-effect relationships, argument cascades, and how concepts build on each other"
+      check_prompt: |
+        Does the skeleton capture the author's chain of reasoning?
+        Look for: "X leads to Y", evidence supporting a claim, logical progression of ideas.
+      importance: critical
+    empirical_evidence:
+      description: "Studies, experiments, data, or case studies presented as evidence"
+      check_prompt: |
+        Are empirical studies and data-backed claims captured?
+        Look for: cited research, experimental data, case studies, statistical findings.
+      importance: high
+    counter_arguments:
+      description: "Objections, limitations, alternative viewpoints the author addresses"
+      check_prompt: |
+        Does the skeleton include limitations or counterpoints the author raises?
+        Look for: "however", "critics argue", "limitations", "caveats", opposing views.
+      importance: high
+    practical_applications:
+      description: "Real-world implications, actionable advice, or implementation guidance"
+      check_prompt: |
+        Does the skeleton capture practical takeaways for readers?
+        Look for: "you can", "recommendation", "application", "practice", "implement".
+      importance: medium
+
+chapter:
+  analysis_prompt: |
+    Given the frozen skeleton and this chapter's content:
+
+    1. Identify which skeleton concepts are addressed
+    2. Extract detailed explanations, evidence, and examples
+    3. Note any new concepts introduced that extend the skeleton
+    4. Flag code snippets or technical details worth preserving
+    5. Note any contradictions or refinements to skeleton claims
+
+  output_schema:
+    type: object
+    properties:
+      chapter_id: { type: string }
+      topics_covered:
+        type: array
+        items:
+          type: object
+          properties:
+            topic: { type: string }
+            key_insights: { type: array, items: { type: string } }
+            technical_details: { type: array, items: { type: string } }
+            code_references: { type: array, items: { type: string } }
+      new_concepts: { type: array, items: { type: string } }
+      contradictions: { type: array, items: { type: string } }
