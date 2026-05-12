@@ -289,6 +289,17 @@ def run_digestion(book_slug: str) -> None:
     obsidian.write_mindmap(book_slug, mm_content)
     print(f"[Phase 4] Mind map embedded in book note.")
 
+    # Render WeChat HTML
+    from lumen.renderers.html import WeChatRenderer
+    wc = WeChatRenderer(book_title=book_slug)
+    html_content = wc.render(synthesis)
+    html_dir = os.path.join(work_dir, book_slug)
+    os.makedirs(html_dir, exist_ok=True)
+    html_path = os.path.join(html_dir, f"{book_slug}.html")
+    with open(html_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    print(f"[Phase 4] WeChat HTML: {html_path}")
+
     # Update checkpoint
     manager.update_phase(book_slug, "complete")
     print(f"[Phase 4] Complete. Book '{book_slug}' is ready in vault.")
