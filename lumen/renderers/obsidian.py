@@ -1,10 +1,7 @@
 """Obsidian note renderer — writes structured book notes to an Obsidian vault."""
 
-import json
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 
 class ObsidianRenderer:
@@ -160,7 +157,7 @@ class ObsidianRenderer:
             lines.append(f"_{importance}_")
             lines.append("")
 
-        lines.append(f"---")
+        lines.append("---")
         lines.append(f"Sourced from: **[[{book_slug}]]**")
         lines.append("")
 

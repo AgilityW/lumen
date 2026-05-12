@@ -10,7 +10,7 @@ from lumen.parsers.base import BaseParser, ParsedBook
 class MDParser(BaseParser):
     """Parse Markdown files. Validates content before processing."""
 
-    def parse(self, path: str) -> dict[str, Any]:
+    def parse(self, path: str) -> ParsedBook:
         try:
             with open(path, "r", encoding="utf-8") as f:
                 content = f.read()

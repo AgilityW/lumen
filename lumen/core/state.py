@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-
 DEFAULT_CHECKPOINT = {
     "book_slug": "",
     "book_path": "",
@@ -135,10 +134,10 @@ class CheckpointManager:
             *lines,
         ])
 
-    def build_dashboard_json(self) -> dict:
+    def build_dashboard_json(self) -> dict[str, Any]:
         """Build machine-readable dashboard as dict with phase grouping."""
         work_dir = Path(self.work_dir)
-        result = {
+        result: dict[str, Any] = {
             "books": [],
             "summary": {"total": 0, "by_phase": {}},
         }

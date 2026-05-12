@@ -12,8 +12,8 @@ class EPUBParser(BaseParser):
 
     def parse(self, path: str) -> ParsedBook:
         import ebooklib
-        from ebooklib import epub
         from bs4 import BeautifulSoup
+        from ebooklib import epub
 
         try:
             book = epub.read_epub(path)

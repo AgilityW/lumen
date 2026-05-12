@@ -10,9 +10,9 @@ Usage:
 import argparse
 import sys
 
+from lumen.core.logger import setup_logging
 from lumen.core.state import CheckpointManager
 from lumen.exceptions import LumenError, UserInterrupt
-from lumen.core.logger import setup_logging
 
 
 def cmd_init(args: argparse.Namespace) -> int:

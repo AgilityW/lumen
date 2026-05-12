@@ -4,7 +4,6 @@ Phase 0: runs after parsing, before chunking. Uses heuristic signal detection.
 """
 
 import re
-from typing import Any
 
 # ── Signal patterns ────────────────────────────────────────────────────
 
@@ -77,7 +76,7 @@ def classify(text: str) -> str:
     if chapter_count >= 3:
         scores["book"] += chapter_count * 3
 
-    best = max(scores, key=scores.get)
+    best: str = max(scores, key=scores.get)  # type: ignore[arg-type]
     best_score = scores[best]
 
     if best_score == 0:

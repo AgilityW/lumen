@@ -6,8 +6,6 @@ at CLI entry point to configure output format and verbosity.
 
 import logging
 import sys
-from typing import Any
-
 
 _LOG = logging.getLogger("lumen")
 _LOG_LEVELS = {"debug": logging.DEBUG, "info": logging.INFO, "warn": logging.WARNING, "error": logging.ERROR}

@@ -159,9 +159,6 @@ class DeepSeekAnalyzer(BaseAnalyzer):
         skeleton = context.get("skeleton", [])
         chapter_info = context.get("chapter", {})
         content_type = context.get("content_type", "unknown")
-        framework = context.get("framework", {})
-
-        chapter_prompt = framework.get("chapter", {}).get("analysis_prompt", "Analyze this section anchored to the skeleton.")
 
         if content_type == "podcast":
             system_msg = (
@@ -296,7 +293,7 @@ class DeepSeekAnalyzer(BaseAnalyzer):
             "do not fabricate. If the content doesn't cover the archetype, leave 'missing' with no new topic.\n"
             "5. Fewer high-quality new topics is better.\n\n"
             "Output JSON: an object with:\n"
-            '- "gap_assessment": array of {"archetype": str (use KEY name!), "status": "covered"|"partial"|"missing", "note": str}\n'
+            '- "gap_assessment": array of {"archetype": str, "status": str, "note": str}\n'
             '- "new_topics": array of topic objects (same schema as the skeleton)\n'
             '- "reasoning": str (brief justification)'
         )
@@ -423,7 +420,7 @@ class DeepSeekAnalyzer(BaseAnalyzer):
         )
 
         if content_type in ("book", "article", "reference"):
-            source_label = content_type if content_type == "book" else "article" if content_type == "article" else "reference material"
+            source_label = "book" if content_type == "book" else "article" if content_type == "article" else "reference material"
             role_label = "the author"
             audience_label = "reader"
         else:

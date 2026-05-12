@@ -6,8 +6,8 @@ from typing import Any
 
 import requests
 
-from lumen.exceptions import APIError
 from lumen.backends.base import BaseAnalyzer
+from lumen.exceptions import APIError
 
 
 class ClaudeAPIAnalyzer(BaseAnalyzer):
@@ -24,7 +24,7 @@ class ClaudeAPIAnalyzer(BaseAnalyzer):
             "anthropic-version": "2023-06-01",
             "Content-Type": "application/json",
         }
-        payload = {
+        payload: dict[str, Any] = {
             "model": self.model,
             "system": system,
             "messages": messages,
@@ -34,7 +34,7 @@ class ClaudeAPIAnalyzer(BaseAnalyzer):
         last_error = None
         for attempt in range(max_retries):
             try:
-                resp = requests.post(url, headers=headers, json=payload, timeout=120, proxies={"http": None, "https": None})
+                resp = requests.post(url, headers=headers, json=payload, timeout=120)
                 if resp.status_code == 200:
                     data = resp.json()
                     return data["content"][0]["text"]
@@ -57,7 +57,7 @@ class ClaudeAPIAnalyzer(BaseAnalyzer):
         content = content.strip()
         if content.startswith("```"):
             lines = content.split("\n")
-            lines = [l for l in lines if not l.startswith("```")]
+            lines = [ln for ln in lines if not ln.startswith("```")]
             content = "\n".join(lines).strip()
         try:
             return json.loads(content)
@@ -289,7 +289,8 @@ class ClaudeAPIAnalyzer(BaseAnalyzer):
             f"**Extracted skeleton topics:**\n{topics_text}\n\n"
             f"**Raw {source_label} excerpt:**\n{raw_content[:12000]}\n\n"
             "Generate 3-5 coverage archetypes targeting topics the skeleton missed.\n\n"
-            'Output: {"domain": str, "domain_archetypes": {key: {"description": str, "check_prompt": str, "importance": str}}, "reasoning": str}'
+            'Output: {"domain": str, "domain_archetypes": {key: '
+            '{"description": str, "check_prompt": str, "importance": str}}, "reasoning": str}'
         )
 
         content = self._call(system=system_msg, messages=[{"role": "user", "content": user_msg}])

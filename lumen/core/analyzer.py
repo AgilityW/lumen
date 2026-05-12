@@ -7,13 +7,12 @@ on skeleton output before presenting to the user.
 import functools
 import json
 import os
-import sys
 from typing import Any
 
 import yaml
 
 from lumen.core.config import load_config
-from lumen.exceptions import ConfigError, APIError, UserInterrupt
+from lumen.exceptions import ConfigError, UserInterrupt
 
 
 @functools.lru_cache(maxsize=8)
@@ -73,7 +72,13 @@ def _create_analyzer(config: dict | None = None):
     if backend == "deepseek":
         from lumen.backends.deepseek import DeepSeekAnalyzer
         ds = api_config.get("deepseek", {})
-        api_key = os.environ.get("DEEPSEEK_API_KEY") or os.environ.get("OPENROUTER_API_KEY") or os.environ.get("OPENAI_API_KEY") or ds.get("api_key") or ""
+        api_key = (
+            os.environ.get("DEEPSEEK_API_KEY")
+            or os.environ.get("OPENROUTER_API_KEY")
+            or os.environ.get("OPENAI_API_KEY")
+            or ds.get("api_key")
+            or ""
+        )
         if not api_key:
             raise ConfigError("DeepSeek API key not configured. Run `lumen init` or set DEEPSEEK_API_KEY.")
         return DeepSeekAnalyzer(
@@ -126,7 +131,7 @@ def run_skeletonize(book_slug: str, chunks: list[dict], content_type: str = "unk
     quality_rules = framework.get("skeleton", {}).get("quality_rules", {})
 
     # ── Pass 1: Initial extraction ────────────────────────────────────
-    print(f"[Phase 2] Pass 1 — Initial skeleton extraction...")
+    print("[Phase 2] Pass 1 — Initial skeleton extraction...")
     skeleton = analyzer.skeletonize(chunks, framework, content_type=content_type)
     quality_ok, quality_issues = _check_skeleton_quality(skeleton, quality_rules, content_type)
     skeleton = _ensure_skeleton_field_safety(skeleton, content_type)
@@ -272,7 +277,7 @@ def _handle_skeleton_review_gate(
     # Finalize checkpoint phase
     manager = CheckpointManager(work_dir=work_dir)
     manager.update_phase(book_slug, "gate_passed")
-    print(f"[Phase 2] Gate passed. Ready for Phase 3.")
+    print("[Phase 2] Gate passed. Ready for Phase 3.")
     return decision, skeleton
 
 
@@ -397,7 +402,10 @@ def _check_skeleton_quality(skeleton: list[dict], rules: dict, content_type: str
                 hard_failure = True
 
         if rules.get("require_relationships"):
-            topics_with_rels = sum(1 for t in skeleton if isinstance(t.get("relationships"), list) and len(t["relationships"]) > 0)
+            topics_with_rels = sum(
+                1 for t in skeleton
+                if isinstance(t.get("relationships"), list) and len(t["relationships"]) > 0
+            )
             if topics_with_rels < len(skeleton) * 0.5:
                 issues.append(f"Only {topics_with_rels}/{len(skeleton)} topics have explicit relationships")
                 hard_failure = True
@@ -568,7 +576,8 @@ def run_synthesis(book_slug: str, analyses: list[dict]) -> dict[str, Any]:
     print("[Phase 3] Synthesizing all chapter analyses...")
     synthesis = analyzer.synthesize(analyses)
 
-    analysis_dir = os.path.join(os.environ.get("LUMEN_WORK_DIR") or config.get("output", {}).get("work_dir", "output"), book_slug, "analysis")
+    base = os.environ.get("LUMEN_WORK_DIR") or config.get("output", {}).get("work_dir", "output")
+    analysis_dir = os.path.join(base, book_slug, "analysis")
     synthesis_path = os.path.join(analysis_dir, "synthesis.json")
     with open(synthesis_path, "w") as f:
         json.dump(synthesis, f, indent=2, ensure_ascii=False)

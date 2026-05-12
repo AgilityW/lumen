@@ -1,8 +1,8 @@
 """Base Analyzer interface — all LLM backends implement this."""
 
 from abc import ABC, abstractmethod
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass

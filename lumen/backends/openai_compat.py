@@ -99,13 +99,13 @@ class OpenAICompatBackend:
 
         raise APIError(f"API call failed after {max_retries} retries: {last_error}")
 
-    def parse_json_response(self, content: str) -> dict | list:
+    def parse_json_response(self, content: str) -> dict | list | None:
         """Parse JSON from LLM response. Handles markdown code fences."""
         content = content.strip()
         # Strip markdown ```json ... ``` fences
         if content.startswith("```"):
             lines = content.split("\n")
-            lines = [l for l in lines if not l.startswith("```")]
+            lines = [ln for ln in lines if not ln.startswith("```")]
             content = "\n".join(lines).strip()
 
         try:

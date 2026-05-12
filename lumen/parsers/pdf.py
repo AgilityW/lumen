@@ -16,7 +16,7 @@ _CHAPTER_PATTERN = re.compile(
 class PDFParser(BaseParser):
     """Parse text-based PDFs. Exits with guidance if no text layer found."""
 
-    def parse(self, path: str) -> dict[str, Any]:
+    def parse(self, path: str) -> ParsedBook:
         import fitz  # pymupdf
 
         doc = fitz.open(path)

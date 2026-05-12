@@ -5,8 +5,6 @@ incrementally. This bridge exports and imports session handoff notes to maintain
 progress across multiple conversations.
 """
 
-import json
-import os
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -41,14 +39,14 @@ class ClaudeCodeBridge:
 
         content = [
             f"# Session Handoff: {book_slug}",
-            f"",
+            "",
             f"- **Session**: {session_id}",
             f"- **Phase**: {phase}",
             f"- **Status**: {status}",
             f"- **Timestamp**: {now}",
-            f"",
-            f"## Progress Notes",
-            f"",
+            "",
+            "## Progress Notes",
+            "",
         ]
         for note in notes:
             content.append(f"- {note}")

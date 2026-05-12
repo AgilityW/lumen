@@ -3,12 +3,11 @@
 import os
 from pathlib import Path
 from typing import Any
-from dataclasses import asdict
 
 from lumen.exceptions import ParseError
-from lumen.parsers.pdf import PDFParser
 from lumen.parsers.epub import EPUBParser
 from lumen.parsers.md import MDParser
+from lumen.parsers.pdf import PDFParser
 
 SUPPORTED_EXTENSIONS = {
     ".pdf": PDFParser,
@@ -38,7 +37,7 @@ def parse_book(path: str) -> dict[str, Any]:
             f"Supported: {', '.join(sorted(SUPPORTED_EXTENSIONS))}"
         )
 
-    parser = parser_cls()
+    parser = parser_cls()  # type: ignore[abstract]
     pb = parser.parse(path)
     # Convert ParsedBook dataclass -> dict (map to downstream expected keys)
     parsed = {

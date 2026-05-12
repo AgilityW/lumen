@@ -4,10 +4,11 @@ These are thin wrappers called by the CLI. Heavy lifting lives in the
 individual phase modules (parser, chunker, analyzer, renderer).
 """
 
-import os
-import re
 import json
 import logging
+import os
+import re
+import sys
 from pathlib import Path
 
 import yaml
@@ -40,7 +41,7 @@ def init_config() -> None:
     API keys are written to .env (not config.yaml) to prevent accidental
     credential leaks via git. Non-secret config goes to config.yaml.
     """
-    from lumen.core.config import find_config, default_config, invalidate_config_cache
+    from lumen.core.config import default_config, find_config, invalidate_config_cache
     existing = find_config()
     if existing:
         print(f"[INFO] Config already exists at {existing}")
@@ -113,7 +114,7 @@ def init_config() -> None:
 
 def sync_to_vault() -> None:
     """Persist runtime data from latest checkpoint to Obsidian vault."""
-    from lumen.core.config import find_config, load_config
+    from lumen.core.config import load_config
     config = load_config()
     if not config.get("vault", {}).get("path"):
         raise ConfigError("Run `lumen init` first to configure.")
@@ -141,8 +142,8 @@ def sync_to_vault() -> None:
         return
 
     # Digest all completed books
-    from lumen.renderers.obsidian import ObsidianRenderer
     from lumen.renderers.mindmap import MindmapRenderer
+    from lumen.renderers.obsidian import ObsidianRenderer
 
     obsidian = ObsidianRenderer(vault_path)
     mindmap = MindmapRenderer()
@@ -171,10 +172,10 @@ def ingest_book(book_path: str) -> dict:
 
     Returns the parsed book dict with chunks and structure, ready for Phase 2.
     """
-    from lumen.core.parser import parse_book, build_structure
     from lumen.core.chunker import chunk_book
-    from lumen.core.state import CheckpointManager
     from lumen.core.classifier import classify
+    from lumen.core.parser import build_structure, parse_book
+    from lumen.core.state import CheckpointManager
 
     # Resolve config for output directory
     # LUMEN_WORK_DIR env var overrides config
@@ -185,13 +186,13 @@ def ingest_book(book_path: str) -> dict:
     parsed = parse_book(book_path)
 
     # 2. Classify content type
-    print(f"[Phase 1] Classifying content type...")
+    print("[Phase 1] Classifying content type...")
     content_type = classify(parsed.get("text", ""))
     parsed["content_type"] = content_type
     print(f"[Phase 1] Detected content type: {content_type}")
 
     # 3. Chunk (content-type-aware)
-    print(f"[Phase 1] Chunking...")
+    print("[Phase 1] Chunking...")
     parsed = chunk_book(parsed)
 
     # 4. Build structure
@@ -221,14 +222,14 @@ def ingest_book(book_path: str) -> dict:
     })
 
     print(f"[Phase 1] Complete. Output in {output_dir}/")
-    print(f"[Phase 1] Checkpoint phase: skeletonize")
+    print("[Phase 1] Checkpoint phase: skeletonize")
     parsed["slug"] = slug
     parsed["content_type"] = content_type
     return parsed
 
 
 def _to_slug(name: str) -> str:
-    """Convert a filename to a slug suitable for directory names.""" 
+    """Convert a filename to a slug suitable for directory names."""
     slug = name.lower()
     slug = re.sub(r"[^a-z0-9\u4e00-\u9fff]+", "-", slug)
     slug = slug.strip("-")
@@ -259,8 +260,8 @@ def run_digestion(book_slug: str) -> None:
     if resolved != book_slug:
         print(f"[Phase 4] Slug auto-resolved: '{book_slug}' -> '{resolved}'")
         book_slug = resolved
-    from lumen.renderers.obsidian import ObsidianRenderer
     from lumen.renderers.mindmap import MindmapRenderer
+    from lumen.renderers.obsidian import ObsidianRenderer
 
     manager = CheckpointManager(work_dir=work_dir)
     cp = manager.load_checkpoint(book_slug)
@@ -276,7 +277,7 @@ def run_digestion(book_slug: str) -> None:
     with open(synthesis_path) as f:
         synthesis = json.load(f)
 
-    print(f"[Phase 4] Rendering to Obsidian vault...")
+    print("[Phase 4] Rendering to Obsidian vault...")
 
     # Render notes
     obsidian = ObsidianRenderer(vault_path=vault_path, book_dir=book_dir)
@@ -287,7 +288,7 @@ def run_digestion(book_slug: str) -> None:
     mindmap = MindmapRenderer()
     mm_content = mindmap.render(synthesis)
     obsidian.write_mindmap(book_slug, mm_content)
-    print(f"[Phase 4] Mind map embedded in book note.")
+    print("[Phase 4] Mind map embedded in book note.")
 
     # Render WeChat HTML
     from lumen.renderers.html import WeChatRenderer
@@ -303,7 +304,7 @@ def run_digestion(book_slug: str) -> None:
     # Update checkpoint
     manager.update_phase(book_slug, "complete")
     print(f"[Phase 4] Complete. Book '{book_slug}' is ready in vault.")
-    print(f"[Phase 4] Run `lumen sync` to ensure all data is persisted.")
+    print("[Phase 4] Run `lumen sync` to ensure all data is persisted.")
 
 
 def _check_book_path(book_path: str) -> str:

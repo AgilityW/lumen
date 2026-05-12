@@ -5,7 +5,6 @@ Node styling: [[name]] for concepts (rectangle with rounded edges),
 [label] for arguments (stadium shape), plain text for groups.
 """
 
-from typing import Any
 
 
 class MindmapRenderer:

@@ -197,17 +197,17 @@ def _split_paragraphs(text: str, source_label: str) -> list[dict[str, Any]]:
 
 def _split_at_speaker_boundaries(text: str, source_label: str, max_chars: int) -> list[dict[str, Any]]:
     """Split a large podcast segment at speaker boundaries (**Speaker:** lines).
-    
+
     Each speaker turn is preserved as a unit. Adjacent short turns are merged
     up to max_chars. Falls back to paragraph split if no speaker boundaries found.
     """
     speaker_pattern = re.compile(r'^\*\*[^*]+:\*\*', re.MULTILINE)
     matches = list(speaker_pattern.finditer(text))
-    
+
     # No speaker boundaries or very few — fall back to paragraph split
     if len(matches) < 2:
         return _split_paragraphs(text, source_label)
-    
+
     # Extract speaker turns
     turns = []
     for i, m in enumerate(matches):
@@ -216,19 +216,19 @@ def _split_at_speaker_boundaries(text: str, source_label: str, max_chars: int) -
         turn_text = text[start:end].strip()
         if turn_text:
             turns.append(turn_text)
-    
+
     # Merge turns into chunks
     chunks = []
-    current_chunk = []
+    current_chunk: list[str] = []
     current_len = 0
-    
+
     for turn in turns:
         turn_len = len(turn)
         if current_len + turn_len > max_chars and current_chunk:
             chunks.append({"source": source_label, "text": "\n\n".join(current_chunk)})
             current_chunk = []
             current_len = 0
-        
+
         # Single turn exceeding max — force split at paragraph boundaries within it
         if turn_len > max_chars:
             if current_chunk:
@@ -252,10 +252,10 @@ def _split_at_speaker_boundaries(text: str, source_label: str, max_chars: int) -
         else:
             current_chunk.append(turn)
             current_len += turn_len
-    
+
     if current_chunk:
         chunks.append({"source": source_label, "text": "\n\n".join(current_chunk)})
-    
+
     return chunks
 
 def _chunk_book_default(parsed: dict[str, Any]) -> list[dict[str, Any]]:
