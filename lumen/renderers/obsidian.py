@@ -1,5 +1,6 @@
 """Obsidian note renderer — writes structured book notes to an Obsidian vault."""
 
+import re
 from datetime import datetime
 from pathlib import Path
 
@@ -30,7 +31,7 @@ class ObsidianRenderer:
             if not cname:
                 continue
             slug = cname.lower().replace(" ", "-").replace("/", "-")
-            slug = slug.replace("--", "-").strip("-")
+            slug = re.sub(r"-+", "-", slug).strip("-")
             if slug in seen_slugs:
                 continue
             seen_slugs.add(slug)

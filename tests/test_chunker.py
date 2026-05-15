@@ -41,12 +41,12 @@ class TestChunker:
 
     def test_chunk_podcast_simple(self):
         text = "# Intro\nHello world.\n# Main\nCore content.\n# Outro\nBye."
-        chunks = _chunk_podcast(text, target_chars=50000)
+        chunks = _chunk_podcast(text, max_chars=50000)
         assert len(chunks) >= 1
         assert all("source" in c and "text" in c for c in chunks)
 
     def test_chunk_podcast_empty(self):
-        chunks = _chunk_podcast("", target_chars=50000)
+        chunks = _chunk_podcast("", max_chars=50000)
         # empty string gets a default "Intro" section with empty text
         assert len(chunks) == 0 or (len(chunks) == 1 and chunks[0]["source"] == "Intro" and chunks[0]["text"] == "")
 

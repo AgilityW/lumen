@@ -16,7 +16,8 @@ class TestConfig:
         assert "framework" in cfg
         assert "checkpoint" in cfg
         assert cfg["api"]["backend"] == "deepseek"
-        assert cfg["api"]["deepseek"]["api_key"] == ""
+        assert "base_url" in cfg["api"]["deepseek"]
+        assert "model" in cfg["api"]["deepseek"]
 
     def test_load_config_cache_invalidation(self):
         invalidate_config_cache()
@@ -52,8 +53,9 @@ class TestConfig:
 
     def test_key_fallback_chain(self):
         cfg = default_config()
-        assert cfg["api"]["deepseek"]["api_key"] == ""
-        assert cfg["api"]["claude"]["api_key"] == ""
+        assert "base_url" in cfg["api"]["deepseek"]
+        assert "model" in cfg["api"]["deepseek"]
+        assert cfg["api"]["claude"]["model"] == "claude-sonnet-4-20250514"
 
     def test_vault_defaults(self):
         cfg = default_config()

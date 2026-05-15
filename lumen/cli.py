@@ -10,7 +10,6 @@ Usage:
 import argparse
 import sys
 
-from lumen.core.logger import setup_logging
 from lumen.core.state import CheckpointManager
 from lumen.exceptions import LumenError, UserInterrupt
 
@@ -81,7 +80,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    setup_logging()
     parser = build_parser()
     args = parser.parse_args(argv)
 

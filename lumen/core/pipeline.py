@@ -72,7 +72,7 @@ def init_config() -> None:
         ds_key = input("DeepSeek API key (or press Enter to skip): ").strip()
         if ds_key:
             env_updates["DEEPSEEK_API_KEY"] = ds_key
-        ds_model = input("DeepSeek model (default: deepseek/deepseek-v4-flash): ").strip()
+        ds_model = input("DeepSeek model (default: deepseek-chat): ").strip()
         if ds_model:
             config["api"]["deepseek"]["model"] = ds_model
 
@@ -92,9 +92,7 @@ def init_config() -> None:
             if fw:
                 config["framework"]["default"] = fw
 
-    # Write non-secret config to config.yaml (api_key fields remain empty)
-    config["api"]["deepseek"]["api_key"] = ""
-    config["api"]["claude"]["api_key"] = ""
+    # api_key is read ONLY from env (DEEPSEEK_API_KEY, CLAUDE_API_KEY, etc.)
     target = os.path.join(os.getcwd(), "config.yaml")
     Path(target).parent.mkdir(parents=True, exist_ok=True)
     with open(target, "w") as f:
@@ -161,6 +159,7 @@ def sync_to_vault() -> None:
         obsidian.render(slug, synthesis)
         mm_content = mindmap.render(synthesis)
         obsidian.write_mindmap(slug, mm_content)
+        manager.sync_timestamp(slug)
         print(f"[OK] Synced '{slug}' to vault.")
 
 

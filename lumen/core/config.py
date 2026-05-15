@@ -52,12 +52,10 @@ def default_config() -> dict[str, Any]:
         "api": {
             "backend": "deepseek",
             "deepseek": {
-                "api_key": "",
                 "base_url": "https://api.deepseek.com",
                 "model": "deepseek-chat",
             },
             "claude": {
-                "api_key": "",
                 "base_url": "https://api.anthropic.com",
                 "model": "claude-sonnet-4-20250514",
             },

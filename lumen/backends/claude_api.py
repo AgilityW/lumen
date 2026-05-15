@@ -277,7 +277,12 @@ class ClaudeAPIAnalyzer(BaseAnalyzer):
             for t in skeleton
         )
 
-        source_label = "book" if content_type != "podcast" else "podcast transcript"
+        if content_type == "podcast":
+            source_label = "podcast transcript"
+        elif content_type in ("book", "article", "reference"):
+            source_label = content_type
+        else:
+            source_label = "source material"
 
         system_msg = (
             f"You are a {source_label} gap archetype generator. "

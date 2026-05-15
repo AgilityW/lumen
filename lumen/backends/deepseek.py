@@ -423,10 +423,14 @@ class DeepSeekAnalyzer(BaseAnalyzer):
             source_label = "book" if content_type == "book" else "article" if content_type == "article" else "reference material"
             role_label = "the author"
             audience_label = "reader"
-        else:
+        elif content_type == "podcast":
             source_label = "podcast transcript"
             role_label = "the guest"
             audience_label = "listener"
+        else:
+            source_label = "source material"
+            role_label = "the author"
+            audience_label = "reader"
 
         system_msg = (
             f"You are a {source_label} gap archetype generator. Your job is NOT to "

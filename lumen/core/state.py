@@ -97,6 +97,20 @@ class CheckpointManager:
         cp["updated_at"] = datetime.now(timezone.utc).isoformat()
         self._write(cp, book_slug)
 
+    def sync_timestamp(self, book_slug: str) -> None:
+        """Record the last vault-sync timestamp on the checkpoint.
+
+        This is the dedicated method for sync operations instead of
+        writing artifacts directly from sync_to_vault().
+        """
+        cp = self.load_checkpoint(book_slug)
+        if cp is None:
+            return
+        now = datetime.now(timezone.utc).isoformat()
+        cp['last_sync_at'] = now
+        cp['updated_at'] = now
+        self._write(cp, book_slug)
+
     def build_dashboard(self) -> str:
         """Build a human-readable status dashboard across all books."""
         work_dir = Path(self.work_dir)

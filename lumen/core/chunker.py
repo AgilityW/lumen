@@ -24,7 +24,7 @@ def chunk_book(parsed: dict[str, Any]) -> dict[str, Any]:
 
     if content_type == "podcast":
         # Use smaller target for podcasts so speaker-boundary splitting kicks in
-        chunks = _chunk_podcast(text, target_chars=10000)
+        chunks = _chunk_podcast(text, max_chars=10000)
     elif content_type == "article":
         chunks = _chunk_book_default(parsed)
     elif content_type == "reference":
@@ -53,7 +53,7 @@ _SECTION_MARKER = re.compile(r"^#{1,3}\s+\w+(?:\s+\w+)*$", re.MULTILINE)
 _TIMESTAMP_LINE = re.compile(r"^\[\(\d{1,2}:\d{2}(?::\d{2})?\)\]")
 
 
-def _chunk_podcast(text: str, target_chars: int = _TARGET_CHARS) -> list[dict[str, Any]]:
+def _chunk_podcast(text: str, max_chars: int = _TARGET_CHARS) -> list[dict[str, Any]]:
     """Chunk a podcast transcript at Q&A boundaries, section markers, then paragraph bounds."""
     # First: split into top-level sections (## headers)
     sections = _split_by_section_markers(text)
@@ -72,9 +72,9 @@ def _chunk_podcast(text: str, target_chars: int = _TARGET_CHARS) -> list[dict[st
 
         for seg_text in segments:
             # If a single segment is too large, sub-chunk at speaker boundaries (preserves flow)
-            max_chars_for_podcast = max(target_chars, min(len(seg_text) // 3, _MAX_CHARS))
+            max_chars_for_podcast = max(max_chars, min(len(seg_text) // 3, _MAX_CHARS))
             if len(seg_text) > max_chars_for_podcast:
-                sub_chunks = _split_at_speaker_boundaries(seg_text, section_title, target_chars)
+                sub_chunks = _split_at_speaker_boundaries(seg_text, section_title, max_chars)
                 chunks.extend(sub_chunks)
             else:
                 chunks.append({"source": section_title, "text": seg_text.strip()})

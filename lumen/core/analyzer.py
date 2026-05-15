@@ -76,7 +76,6 @@ def _create_analyzer(config: dict | None = None):
             os.environ.get("DEEPSEEK_API_KEY")
             or os.environ.get("OPENROUTER_API_KEY")
             or os.environ.get("OPENAI_API_KEY")
-            or ds.get("api_key")
             or ""
         )
         if not api_key:
@@ -90,7 +89,7 @@ def _create_analyzer(config: dict | None = None):
     if backend == "claude":
         from lumen.backends.claude_api import ClaudeAPIAnalyzer
         cl = api_config.get("claude", {})
-        api_key = os.environ.get("CLAUDE_API_KEY") or cl.get("api_key") or ""
+        api_key = os.environ.get("CLAUDE_API_KEY") or ""
         if not api_key:
             raise ConfigError("Claude API key not configured. Run `lumen init` or set CLAUDE_API_KEY.")
         return ClaudeAPIAnalyzer(api_key=api_key, model=cl.get("model", "claude-sonnet-4-20250514"))
@@ -111,15 +110,6 @@ def run_skeletonize(book_slug: str, chunks: list[dict], content_type: str = "unk
     Returns the validated skeleton (list of topics).
     """
     config = load_config()
-
-    # ── Slug resolution ────────────────────────────────────────────────
-    from lumen.core.state import CheckpointManager
-    work_dir = os.environ.get("LUMEN_WORK_DIR") or config.get("output", {}).get("work_dir", "output")
-    _slug_mgr = CheckpointManager(work_dir=work_dir)
-    resolved = _slug_mgr.resolve_slug(book_slug)
-    if resolved != book_slug:
-        print(f"[Phase 2] Slug auto-resolved: '{book_slug}' -> '{resolved}'")
-        book_slug = resolved
 
     # ── Framework + Analyzer setup ────────────────────────────────────
     framework_name = _detect_framework(content_type)
@@ -186,12 +176,13 @@ def run_skeletonize(book_slug: str, chunks: list[dict], content_type: str = "unk
         print(f"[WARN] Final quality issues: {'; '.join(quality_issues)}")
         print("[WARN] User can request redo at review gate.")
 
+    work_dir = os.environ.get("LUMEN_WORK_DIR") or config.get("output", {}).get("work_dir", "output")
     skeleton_path = _save_skeleton(skeleton, book_slug, work_dir)
     print(f"[Phase 2] Final skeleton: {len(skeleton)} topics.")
 
     # ── GATE: User review ──────────────────────────────────────────────
     decision, skeleton = _handle_skeleton_review_gate(
-        skeleton, book_slug, framework, chunks, content_type, analyzer, skeleton_path,
+        skeleton, book_slug, framework, chunks, content_type, analyzer, skeleton_path, work_dir,
     )
 
     if decision == "quit":
@@ -243,6 +234,7 @@ def _handle_skeleton_review_gate(
     content_type: str,
     analyzer: Any,
     skeleton_path: str,
+    work_dir: str,
 ) -> tuple[str, list[dict]]:
     """Phase 2 GATE: present skeleton for user review.
 
@@ -251,7 +243,6 @@ def _handle_skeleton_review_gate(
       final_skeleton: the (possibly regenerated) skeleton
     """
     from lumen.core.state import CheckpointManager
-    work_dir = os.path.dirname(os.path.dirname(skeleton_path))
 
     book_title = book_slug.replace("-", " ").title()
     decision, feedback = present_skeleton_for_review(skeleton, book_title, content_type)
@@ -578,6 +569,7 @@ def run_synthesis(book_slug: str, analyses: list[dict]) -> dict[str, Any]:
 
     base = os.environ.get("LUMEN_WORK_DIR") or config.get("output", {}).get("work_dir", "output")
     analysis_dir = os.path.join(base, book_slug, "analysis")
+    os.makedirs(analysis_dir, exist_ok=True)
     synthesis_path = os.path.join(analysis_dir, "synthesis.json")
     with open(synthesis_path, "w") as f:
         json.dump(synthesis, f, indent=2, ensure_ascii=False)
